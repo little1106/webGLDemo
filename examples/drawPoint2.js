@@ -1,8 +1,9 @@
 const VSHADER_SOURCE = `
     attribute vec4 a_Position;
+    attribute float a_PointSize;
     void main() {
         gl_Position = a_Position;
-        gl_PointSize = 10.0;
+        gl_PointSize = a_PointSize;
     }
 `;
 
@@ -23,6 +24,8 @@ function main() {
 
     //获取attribute变量存储位置
     let a_Position = gl.getAttribLocation(shaderPrograme, 'a_Position');
+    let a_PointSize = gl.getAttribLocation(shaderPrograme, 'a_PointSize');
+
 
     //验证a_Position是否获取成功，为-1则attribute变量不存在或命名不规范，>=0则获取成功
     if(a_Position < 0) {
@@ -31,7 +34,8 @@ function main() {
 
     //向attribute变量赋值
     gl.vertexAttrib3f(a_Position, 0.5, 0.0, 0.0);
-    
+    gl.vertexAttrib1f(a_PointSize, 15.0);
+
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.points, 0, 1);
