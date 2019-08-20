@@ -2,7 +2,7 @@ const VSHADER_SOURCE = `
     attribute vec4 a_Position;
     void main() {
         gl_Position = a_Position;
-        gl_PointSize = 10.0;
+        //gl_PointSize = 10.0;
     }
 `;
 const FSHADER_SOURCE = `
@@ -27,7 +27,7 @@ function main() {
 
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    gl.drawArrays(gl.POINTS, 0, pointNumber)
+    gl.drawArrays(gl.TRIANGLES, 0, pointNumber)
 }
 
 function initVertexBuffer (gl, shaderProgram) {
