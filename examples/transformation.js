@@ -1,7 +1,15 @@
 const VSHADER_SOURCE = `
     attribute vec4 a_Position;
+    uniform vec4 u_Translation;
+    uniform vec4 u_Rotate;
+    uniform float u_CosB, u_SinB;
     void main() {
-        gl_Position = a_Position;
+        // u_Rotate = a_Position + u_Translation;
+        gl_Position.x = a_Position.x * u_CosB - a_Position.y * u_SinB;
+        gl_Position.y = a_Position.x * u_SinB + a_Position.y * u_CosB;
+        gl_Position.z = a_Position.z;
+        gl_Position.w = 1.0;
+        // gl_Position = gl_Position + u_Translation;
         //gl_PointSize = 10.0;
     }
 `;
@@ -12,7 +20,7 @@ const FSHADER_SOURCE = `
 `;
 
 function main() {
-    let canvas = document.getElementById('multiPoints');
+    let canvas = document.getElementById('transformation');
     let gl = canvas.getContext('webgl');
     const shaderProgram = initShader(gl, VSHADER_SOURCE, FSHADER_SOURCE);
     if(!shaderProgram) {
@@ -20,21 +28,31 @@ function main() {
     }
     gl.useProgram(shaderProgram);
 
+
     // let a_Position = gl.getAttribLocation(shaderProgram, 'a_Position');
     let pointNumber = initVertexBuffer(gl, shaderProgram);
+
+    let radian = Math.PI * 90 / 180;
+    let u_SinB = gl.getUniformLocation(shaderProgram, 'u_SinB');
+    let u_CosB = gl.getUniformLocation(shaderProgram, 'u_CosB');
+    let u_Translation = gl.getUniformLocation(shaderProgram, 'u_Translation');
+
+    gl.uniform1f(u_CosB, Math.cos(radian));
+    gl.uniform1f(u_SinB, Math.sin(radian));
+    gl.uniform4f(u_Translation, 0.5, 0.5, 0.0, 0.0)
     
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, pointNumber)
+    gl.drawArrays(gl.TRIANGLES, 0, pointNumber)
 }
 
 function initVertexBuffer (gl, shaderProgram) {
     let vertices = new Float32Array([
-         0.5, 0.5,-0.5, 0.5, 0.5, -0.5, -0.5, -0.5
+         0.0, 0.5, 0.5, -0.5, -0.5, -0.5
     ])
-    let n = 4;
+    let n = 3;
     console.log('program', gl.program)
     let vertexBuffer = gl.createBuffer();
     if(!vertexBuffer) {
