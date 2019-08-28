@@ -3,14 +3,16 @@ const VSHADER_SOURCE = `
     uniform vec4 u_Translation;
     uniform vec4 u_Rotate;
     uniform float u_CosB, u_SinB;
+    uniform mat4 u_TransformMatrix;
     void main() {
         // u_Rotate = a_Position + u_Translation;
-        gl_Position.x = a_Position.x * u_CosB - a_Position.y * u_SinB;
-        gl_Position.y = a_Position.x * u_SinB + a_Position.y * u_CosB;
-        gl_Position.z = a_Position.z;
-        gl_Position.w = 1.0;
+        // gl_Position.x = a_Position.x * u_CosB - a_Position.y * u_SinB;
+        // gl_Position.y = a_Position.x * u_SinB + a_Position.y * u_CosB;
+        // gl_Position.z = a_Position.z;
+        // gl_Position.w = 1.0;
         // gl_Position = gl_Position + u_Translation;
         //gl_PointSize = 10.0;
+        gl_Position = u_TransformMatrix * a_Position;
     }
 `;
 const FSHADER_SOURCE = `
@@ -32,6 +34,7 @@ function main() {
     // let a_Position = gl.getAttribLocation(shaderProgram, 'a_Position');
     let pointNumber = initVertexBuffer(gl, shaderProgram);
 
+    //公式
     let radian = Math.PI * 90 / 180;
     let u_SinB = gl.getUniformLocation(shaderProgram, 'u_SinB');
     let u_CosB = gl.getUniformLocation(shaderProgram, 'u_CosB');
@@ -40,6 +43,18 @@ function main() {
     gl.uniform1f(u_CosB, Math.cos(radian));
     gl.uniform1f(u_SinB, Math.sin(radian));
     gl.uniform4f(u_Translation, 0.5, 0.5, 0.0, 0.0)
+
+    //矩阵
+    let transformMatrix = new Float32Array([
+        1.0, 0.0, 0.0, 0.0,
+        0.0, 1.5, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.5, 0.5, 0.0, 1.0
+    ])
+
+    console.log('matrix', transformMatrix)
+    let u_TransformMatrix = gl.getUniformLocation(shaderProgram, 'u_TransformMatrix');
+    gl.uniformMatrix4fv(u_TransformMatrix, false, transformMatrix)
     
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
