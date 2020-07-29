@@ -5,6 +5,7 @@ const VSHADER_SOURCE = `
     uniform float u_CosB, u_SinB;
     uniform mat4 u_TransformMatrix;
     uniform mat4 u_RotateMatrix;
+    uniform mat4 u_ScaleMatrix;
     void main() {
         // u_Rotate = a_Position + u_Translation;
         // gl_Position.x = a_Position.x * u_CosB - a_Position.y * u_SinB;
@@ -14,7 +15,8 @@ const VSHADER_SOURCE = `
         // gl_Position = gl_Position + u_Translation;
         //gl_PointSize = 10.0;
         //gl_Position = u_TransformMatrix * a_Position;
-        gl_Position = u_RotateMatrix * a_Position;
+        // gl_Position = u_RotateMatrix * a_Position;
+        gl_Position = u_TransformMatrix * u_RotateMatrix * u_ScaleMatrix * a_Position;
     }
 `;
 const FSHADER_SOURCE = `
@@ -69,10 +71,20 @@ function main() {
         0, 0, 1, 0,
         0, 0, 0, 1
     ]);
-
     let u_RotateMatrix = gl.getUniformLocation(shaderProgram, 'u_RotateMatrix');
     gl.uniformMatrix4fv(u_RotateMatrix, false, rotateMatrix);
     
+    // 缩放矩阵
+    let Sx = 0.5, Sy = 0.5, Sz = 0.5;
+    let scaleMatrix = new Float32Array([
+        Sx, 0, 0, 0,
+        0, Sy, 0, 0,
+        0, 0, Sz, 0,
+        0, 0, 0, 1.0
+    ]);
+    let u_scaleMatrix = gl.getUniformLocation(shaderProgram, 'u_ScaleMatrix');
+    gl.uniformMatrix4fv(u_scaleMatrix, false, scaleMatrix);
+
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
     gl.clear(gl.COLOR_BUFFER_BIT);
