@@ -4,6 +4,7 @@ const VSHADER_SOURCE = `
     uniform vec4 u_Rotate;
     uniform float u_CosB, u_SinB;
     uniform mat4 u_TransformMatrix;
+    uniform mat4 u_RotateMatrix;
     void main() {
         // u_Rotate = a_Position + u_Translation;
         // gl_Position.x = a_Position.x * u_CosB - a_Position.y * u_SinB;
@@ -12,7 +13,8 @@ const VSHADER_SOURCE = `
         // gl_Position.w = 1.0;
         // gl_Position = gl_Position + u_Translation;
         //gl_PointSize = 10.0;
-        gl_Position = u_TransformMatrix * a_Position;
+        //gl_Position = u_TransformMatrix * a_Position;
+        gl_Position = u_RotateMatrix * a_Position;
     }
 `;
 const FSHADER_SOURCE = `
@@ -20,6 +22,7 @@ const FSHADER_SOURCE = `
         gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
     }
 `;
+
 
 function main() {
     let canvas = document.getElementById('transformation');
@@ -44,7 +47,7 @@ function main() {
     gl.uniform1f(u_SinB, Math.sin(radian));
     gl.uniform4f(u_Translation, 0.5, 0.5, 0.0, 0.0)
 
-    //矩阵
+    // 平移矩阵
     let transformMatrix = new Float32Array([
         1.0, 0.0, 0.0, 0.0,
         0.0, 1.5, 0.0, 0.0,
@@ -54,7 +57,21 @@ function main() {
 
     console.log('matrix', transformMatrix)
     let u_TransformMatrix = gl.getUniformLocation(shaderProgram, 'u_TransformMatrix');
-    gl.uniformMatrix4fv(u_TransformMatrix, false, transformMatrix)
+    gl.uniformMatrix4fv(u_TransformMatrix, false, transformMatrix);
+    
+    // 旋转矩阵
+    let angle = 90.0;
+    let radianA = Math.PI * angle / 180.0;
+    let cosA = Math.cos(radianA), sinA = Math.sin(radianA);
+    let rotateMatrix = new Float32Array([
+        cosA, sinA, 0, 0,
+        -sinA, cosA, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    ]);
+
+    let u_RotateMatrix = gl.getUniformLocation(shaderProgram, 'u_RotateMatrix');
+    gl.uniformMatrix4fv(u_RotateMatrix, false, rotateMatrix);
     
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
@@ -85,37 +102,4 @@ function initVertexBuffer (gl, shaderProgram) {
     gl.enableVertexAttribArray(a_Position);
 
     return n;
-}
-
-function initShader (gl, vSource, fSource) {
-    const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vSource);
-    const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fSource);
-
-    if(!vertexShader || !fragmentShader) {
-        console.log('load shader error');
-        return null
-    }
-
-    const shaderProgram = gl.createProgram();
-
-    gl.attachShader(shaderProgram, vertexShader);
-    gl.attachShader(shaderProgram, fragmentShader);
-
-    gl.linkProgram(shaderProgram);
-
-    return shaderProgram;
-}
-
-function loadShader (gl, type, source) {
-    const shader = gl.createShader(type);
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    const compiled = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-     if(!compiled) {
-         let error = gl.getShaderInfoLog(shader);
-         console.log('failed to compile shader', error);
-         gl.deleteShader(shader);
-         return null;
-     }
-    return shader;
-}
+};
