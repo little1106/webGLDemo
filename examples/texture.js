@@ -35,10 +35,10 @@ function main() {
 
 function initVertexBuffer(gl, shaderProgram) {
     let vertics = new Float32Array([
-        -0.5, 0.5, 0.0, 1.0,
-        -0.5, -0.5, 0.0, 0.0,
-        0.5, 0.5, 1.0, 1.0,
-        0.5, -0.5, 1.0, 0.0
+        -0.5, 0.5, -0.3, 1.7,
+        -0.5, -0.5, -0.3, -0.2,
+        0.5, 0.5, 1.7, 1.7,
+        0.5, -0.5, 1.7, -0.2
     ]);
     let n = 4;
     let vertexBuffer = gl.createBuffer();
